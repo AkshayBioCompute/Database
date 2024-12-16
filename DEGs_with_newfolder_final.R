@@ -37,7 +37,7 @@ zero_counts_per_sample <- colSums(Counts == 0)
 print(zero_counts_per_sample)
 
 # Define experimental conditions
-condition <- factor(c("8cell", "8cell", "8cell", 
+condition <- factor(c("1cell","1cell", "8cell", "8cell", "8cell", 
                       "Morula", "Morula", "Morula", 
                       "Blastocyst", "Blastocyst", "Blastocyst"))
 
@@ -82,37 +82,13 @@ png(file.path(overall_output_folder, "Dispersion_Estimates_Overall.png"), width 
 plotDispEsts(dds, main = "Dispersion Estimates: Overall")
 dev.off()
 
-# Heatmap
-count_data <- assay(vsdata)
-stage_labels <- coldata$condition
 
-calculate_pcc <- function(data, stage) {
-  stage_data <- data[, stage_labels == stage]
-  cor(stage_data, method = "pearson")
-}
-
-stages <- unique(stage_labels)
-pcc_list <- lapply(stages, function(stage) {
-  list(stage = stage, pcc = calculate_pcc(count_data, stage))
-})
-
-combined_pcc <- sapply(pcc_list, function(stage_data) colMeans(stage_data$pcc, na.rm = TRUE))
-rownames(combined_pcc) <- stages
-colnames(combined_pcc) <- stages
-
-png(file.path(overall_output_folder, "Heatmap_Overall.png"), width = 2400, height = 1800, res = 600)
-pheatmap(
-  combined_pcc,
-  cluster_rows = TRUE,
-  cluster_cols = TRUE,
-  display_numbers = FALSE,
-  main = "Heatmap: Overall",
-  color = colorRampPalette(c("blue", "white", "red"))(50)
-)
-dev.off()
 
 # --- Compare Multiple Conditions ---
 comparisons <- list(
+  c("1cell", "8cell"),
+  c("1cell", "Morula"),
+  c("1cell", "Blastocyst"),
   c("8cell", "Morula"),
   c("Morula", "Blastocyst"),
   c("8cell", "Blastocyst")
@@ -172,3 +148,4 @@ for (comparison in comparisons) {
   ggsave(file.path(output_folder, paste0("Volcano_Plot_", comparison_name, ".png")), plot = volcano_plot, width = 8, height = 6, dpi = 600)
   print(volcano_plot)
 }
+
